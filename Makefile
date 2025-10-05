@@ -1,7 +1,7 @@
+build:
+	docker-compose build
+
 run:
-	uv run python pipeline.py originals/mrbrightside.mp3
+	docker-compose up
 
-install:
-	uv sync
-
-.PHONY: run install
+.PHONY: build run

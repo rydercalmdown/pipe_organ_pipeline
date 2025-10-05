@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Audio - Pipe Organ Pipeline{% endblock %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-4 mb-3">
+        <i class="fas fa-upload text-primary"></i>
+        Upload Your Audio
+    </h1>
+    <p class="lead text-muted">
+        Convert your audio files to organ-optimized MIDI with AI-powered stem separation
+    </p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" id="uploadForm">
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt fa-4x text-primary mb-3"></i>
+                <h4>Drag & Drop Your Audio File Here</h4>
+                <p class="text-muted mb-3">or click to browse</p>
+                <input type="file" name="file" id="fileInput" class="d-none" accept=".mp3,.wav,.m4a,.flac" required>
+                <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-folder-open"></i> Choose File
+                </button>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        Supported formats: MP3, WAV, M4A, FLAC (Max 100MB)
+                    </small>
+                </div>
+            </div>
+            
+            <div id="fileInfo" class="mt-3" style="display: none;">
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>File selected:</strong> <span id="fileName"></span>
+                    <button type="submit" class="btn btn-primary ms-3">
+                        <i class="fas fa-play"></i> Start Processing
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="text-center">
+            <i class="fas fa-cut fa-3x text-primary mb-3"></i>
+            <h5>AI Stem Separation</h5>
+            <p class="text-muted">Separate your audio into drums, bass, vocals, and other instruments using Demucs AI</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="text-center">
+            <i class="fas fa-music fa-3x text-primary mb-3"></i>
+            <h5>MIDI Transcription</h5>
+            <p class="text-muted">Convert each stem to MIDI using BasicPitch neural network</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="text-center">
+            <i class="fas fa-church fa-3x text-primary mb-3"></i>
+            <h5>Organ Optimization</h5>
+            <p class="text-muted">Map tracks to organ channels (Great, Swell, Pedal) for authentic sound</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const uploadForm = document.getElementById('uploadForm');
+
+    // Drag and drop functionality
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFileSelect();
+        }
+    });
+
+    // Click to upload
+    uploadArea.addEventListener('click', function() {
+        fileInput.click();
+    });
+
+    // File input change
+    fileInput.addEventListener('change', handleFileSelect);
+
+    function handleFileSelect() {
+        const file = fileInput.files[0];
+        if (file) {
+            // Check file size (100MB limit)
+            if (file.size > 100 * 1024 * 1024) {
+                alert('File size must be less than 100MB');
+                return;
+            }
+            
+            // Check file type
+            const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/mp4', 'audio/flac'];
+            if (!allowedTypes.includes(file.type) && !file.name.match(/\.(mp3|wav|m4a|flac)$/i)) {
+                alert('Please select a valid audio file (MP3, WAV, M4A, or FLAC)');
+                return;
+            }
+            
+            fileName.textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' MB)';
+            fileInfo.style.display = 'block';
+        }
+    }
+
+    // Form submission
+    uploadForm.addEventListener('submit', function(e) {
+        const file = fileInput.files[0];
+        if (!file) {
+            e.preventDefault();
+            alert('Please select a file first');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = uploadForm.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+        submitBtn.disabled = true;
+    });
+});
+</script>
+{% endblock %}

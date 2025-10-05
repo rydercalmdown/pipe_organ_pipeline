@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Processing - Pipe Organ Pipeline{% endblock %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-4 mb-3">
+        <i class="fas fa-cogs text-primary"></i>
+        Processing Your Audio
+    </h1>
+    <p class="lead text-muted">
+        Please wait while we process your file. This may take several minutes depending on the file size.
+    </p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card file-card">
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
+                </div>
+                
+                <h5 id="statusMessage">Initializing...</h5>
+                
+                <div class="progress mb-3" style="height: 30px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         id="progressBar" role="progressbar" style="width: 0%">
+                        <span id="progressText">0%</span>
+                    </div>
+                </div>
+                
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="processing-step" id="step1">
+                            <i class="fas fa-cut fa-2x text-muted"></i>
+                            <p class="mt-2 mb-0">Stem Separation</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="processing-step" id="step2">
+                            <i class="fas fa-music fa-2x text-muted"></i>
+                            <p class="mt-2 mb-0">MIDI Transcription</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="processing-step" id="step3">
+                            <i class="fas fa-compress-arrows-alt fa-2x text-muted"></i>
+                            <p class="mt-2 mb-0">MIDI Merging</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="processing-step" id="step4">
+                            <i class="fas fa-check fa-2x text-muted"></i>
+                            <p class="mt-2 mb-0">Complete</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        Processing time varies based on file length and complexity
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Upload
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const jobId = '{{ job_id }}';
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const statusMessage = document.getElementById('statusMessage');
+    
+    function updateStatus() {
+        fetch(`/api/status/${jobId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    statusMessage.innerHTML = '<i class="fas fa-exclamation-triangle text-danger"></i> ' + data.error;
+                    return;
+                }
+                
+                // Update progress bar
+                const progress = data.progress || 0;
+                progressBar.style.width = progress + '%';
+                progressText.textContent = progress + '%';
+                
+                // Update status message
+                statusMessage.textContent = data.message || 'Processing...';
+                
+                // Update step indicators
+                updateStepIndicators(progress);
+                
+                // Check if completed
+                if (data.status === 'completed') {
+                    window.location.href = `/results/${jobId}`;
+                } else if (data.status === 'error') {
+                    statusMessage.innerHTML = '<i class="fas fa-exclamation-triangle text-danger"></i> ' + data.message;
+                    progressBar.classList.remove('progress-bar-animated');
+                    progressBar.classList.add('bg-danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching status:', error);
+                statusMessage.innerHTML = '<i class="fas fa-exclamation-triangle text-danger"></i> Error checking status';
+            });
+    }
+    
+    function updateStepIndicators(progress) {
+        const steps = ['step1', 'step2', 'step3', 'step4'];
+        const stepThresholds = [25, 50, 75, 100];
+        
+        steps.forEach((stepId, index) => {
+            const step = document.getElementById(stepId);
+            const icon = step.querySelector('i');
+            
+            if (progress >= stepThresholds[index]) {
+                icon.classList.remove('text-muted');
+                icon.classList.add('text-success');
+                if (index < steps.length - 1) {
+                    icon.classList.add('fa-spin');
+                }
+            } else if (progress >= stepThresholds[index] - 25) {
+                icon.classList.remove('text-muted');
+                icon.classList.add('text-primary');
+            }
+        });
+    }
+    
+    // Update status every 2 seconds
+    updateStatus();
+    const interval = setInterval(updateStatus, 2000);
+    
+    // Clean up interval when page unloads
+    window.addEventListener('beforeunload', function() {
+        clearInterval(interval);
+    });
+});
+</script>
+
+<style>
+.processing-step {
+    transition: all 0.3s ease;
+}
+.processing-step i {
+    transition: all 0.3s ease;
+}
+</style>
+{% endblock %}

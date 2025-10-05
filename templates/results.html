@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Results - Pipe Organ Pipeline{% endblock %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-4 mb-3">
+        <i class="fas fa-check-circle text-success"></i>
+        Processing Complete!
+    </h1>
+    <p class="lead text-muted">
+        Your audio has been successfully processed. Download your stems and MIDI files below.
+    </p>
+</div>
+
+<div class="row">
+    <!-- Combined MIDI File -->
+    <div class="col-12 mb-4">
+        <div class="card file-card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-2 text-center">
+                        <i class="fas fa-church fa-3x text-primary"></i>
+                    </div>
+                    <div class="col-md-8">
+                        <h5 class="card-title mb-1">Combined MIDI File</h5>
+                        <p class="card-text text-muted mb-0">
+                            Complete organ-optimized MIDI with all stems merged and mapped to organ channels
+                        </p>
+                        <small class="text-muted">
+                            <strong>Channels:</strong> Pedal (drums/bass), Swell (vocals), Great (other)
+                        </small>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <a href="{{ url_for('download_file', job_id=job_id, file_type='midi', filename='combined.mid') }}" 
+                           class="btn btn-primary">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Audio Stems -->
+    <div class="col-lg-6 mb-4">
+        <h4 class="mb-3">
+            <i class="fas fa-cut text-primary"></i> Audio Stems
+        </h4>
+        <div class="row">
+            {% for stem_name, stem_path in job_data.results.stems.items() %}
+            <div class="col-12 mb-3">
+                <div class="card file-card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-2 text-center">
+                                {% if stem_name == 'drums' %}
+                                    <i class="fas fa-drum fa-2x text-warning"></i>
+                                {% elif stem_name == 'bass' %}
+                                    <i class="fas fa-guitar fa-2x text-info"></i>
+                                {% elif stem_name == 'vocals' %}
+                                    <i class="fas fa-microphone fa-2x text-danger"></i>
+                                {% else %}
+                                    <i class="fas fa-music fa-2x text-secondary"></i>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="card-title mb-1">{{ stem_name.title() }}</h6>
+                                <p class="card-text text-muted mb-0 small">
+                                    Separated {{ stem_name }} audio track
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <a href="{{ url_for('download_file', job_id=job_id, file_type='stem', filename=stem_path.split('/')[-1]) }}" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Individual MIDI Files -->
+    <div class="col-lg-6 mb-4">
+        <h4 class="mb-3">
+            <i class="fas fa-music text-primary"></i> Individual MIDI Files
+        </h4>
+        <div class="row">
+            {% for stem_name, midi_path in job_data.results.midi_files.items() %}
+            <div class="col-12 mb-3">
+                <div class="card file-card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-2 text-center">
+                                {% if stem_name == 'drums' %}
+                                    <i class="fas fa-drum fa-2x text-warning"></i>
+                                {% elif stem_name == 'bass' %}
+                                    <i class="fas fa-guitar fa-2x text-info"></i>
+                                {% elif stem_name == 'vocals' %}
+                                    <i class="fas fa-microphone fa-2x text-danger"></i>
+                                {% else %}
+                                    <i class="fas fa-music fa-2x text-secondary"></i>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="card-title mb-1">{{ stem_name.title() }} MIDI</h6>
+                                <p class="card-text text-muted mb-0 small">
+                                    MIDI transcription of {{ stem_name }} track
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <a href="{{ url_for('download_file', job_id=job_id, file_type='midi', filename=midi_path.split('/')[-1]) }}" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Processing Info -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle text-info"></i> Processing Information
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Track Name:</strong> {{ job_data.results.track_name }}</p>
+                        <p class="mb-1"><strong>Completed:</strong> {{ job_data.completed_at[:19].replace('T', ' ') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Job ID:</strong> <code>{{ job_id }}</code></p>
+                        <p class="mb-0"><strong>Status:</strong> <span class="badge bg-success">Completed</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('index') }}" class="btn btn-primary me-3">
+            <i class="fas fa-plus"></i> Process Another File
+        </a>
+        <button onclick="window.print()" class="btn btn-outline-secondary">
+            <i class="fas fa-print"></i> Print Results
+        </button>
+    </div>
+</div>
+
+<!-- Usage Instructions -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-question-circle text-info"></i> How to Use Your Files
+                </h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-church text-primary"></i> Combined MIDI</h6>
+                        <p class="small text-muted">
+                            Import into any MIDI software or organ system. The file is optimized for pipe organ with proper channel mapping.
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-cut text-primary"></i> Audio Stems</h6>
+                        <p class="small text-muted">
+                            Use these separated audio tracks for further editing, mixing, or analysis in your DAW.
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-music text-primary"></i> Individual MIDI</h6>
+                        <p class="small text-muted">
+                            Edit individual parts separately or use for specific instrument arrangements.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-refresh page every 5 minutes to check for cleanup
+setTimeout(function() {
+    location.reload();
+}, 300000);
+</script>
+{% endblock %}

@@ -12,6 +12,8 @@ dependencies = [
     "pretty_midi",
     "scipy>=1.9.0,<1.10.0",  # Use compatible scipy version
     "setuptools",  # For pkg_resources
+    "flask>=2.3.0",
+    "werkzeug>=2.3.0",
 ]
 
 [tool.uv]

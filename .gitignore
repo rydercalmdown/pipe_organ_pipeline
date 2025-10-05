@@ -1,3 +1,6 @@
+# Data directory (contains user uploads and results)
+data/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -19,37 +22,40 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # Virtual environments
-.venv/
+.env
+.venv
+env/
 venv/
 ENV/
-env/
+env.bak/
+venv.bak/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
-# Audio files
-*.mp3
-*.wav
-*.flac
-*.m4a
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# MIDI files
-*.mid
-*.midi
-
-# Output directories
-stems/
-midi_files/
+# Logs
+*.log
 
 # Temporary files
 *.tmp
 *.temp
 
-# OS
-.DS_Store
-Thumbs.db
+*.mp3
+*.mid
+*.wav
