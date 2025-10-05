@@ -1,0 +1,18 @@
+[project]
+name = "organ-midi-pipeline"
+version = "0.1.0"
+description = "Audio to MIDI pipeline for organ music"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+    "demucs==4.0.0",
+    "basic-pitch==0.3.0",
+    "torch",
+    "torchaudio",
+    "mido",
+    "pretty_midi",
+    "scipy>=1.9.0,<1.10.0",  # Use compatible scipy version
+    "setuptools",  # For pkg_resources
+]
+
+[tool.uv]
+dev-dependencies = []
